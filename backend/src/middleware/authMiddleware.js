@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 const userToken = (userId) => {
     try{
-        const token = jwt.sign({ id: userId }, process.env.JWT_TOKEN, {expiresIn: "5h"});
+        const token = jwt.sign({ _id: userId }, process.env.JWT_TOKEN, {expiresIn: "5h"});
         return token;
     }
     catch (error) {

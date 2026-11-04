@@ -1,7 +1,8 @@
 import express from "express"
 import cookieParser from "cookie-parser";
 import connectDB from "./src/config/db.js";
-import userRoutes from "./src/routes/User.js";
+import userRoutes from "./src/routes/authRoutes.js";
+import taskRoutes from "./src/routes/taskRoutes.js";
 
 
 const app = express();
@@ -15,5 +16,6 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/auth/users", userRoutes);  
+app.use("/api/", taskRoutes);
 
 connectDB(app);

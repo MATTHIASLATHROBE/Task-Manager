@@ -1,5 +1,5 @@
-import {createUser, loginUser, logoutUser, getUser} from "../controllers/User.js";
-import {verifyToken} from "../middleware/AuthJWT.js";
+import {createUser, loginUser, logoutUser, getUser} from "../controllers/authController.js";
+import {verifyToken} from "../middleware/authMiddleware.js";
 import express from "express";
 const router = express.Router();
 
