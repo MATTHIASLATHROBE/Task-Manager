@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import {Routes, Route} from 'react-router-dom'
 import MainLayout from './component/MainLayout.jsx'
-import Home from './pages/Home.jsx'
+import HomeLayout from './pages/Homepage/HomeLayout.jsx'
 import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
 import MyTasks from './pages/MyTasks.jsx'
 
 
@@ -41,8 +42,9 @@ const App = () => {
     return (
         <>
             <Routes>
-                <Route path="/" element={<MainLayout><Home/></MainLayout>}/>
-                <Route path="/login" element={<MainLayout><Login/></MainLayout>}/>
+                <Route path="/" element={<HomeLayout/>}/>
+                <Route path="/login" element={<Login/>}/>
+                <Route path="/register" element={<Register/>}/>
                 <Route path="/tasks" element={<MainLayout><MyTasks 
                     tasks={tasks} addTask={addTask}
                     toggleTask={toggleTask} deleteTask={deleteTask}
