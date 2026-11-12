@@ -1,9 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { loginUser } from '../services/authServices'
 
 const Login = () => {
 
     const [passwordVisible, setPasswordVisible] = useState(false)
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
 
     const togglePassword = () => {
     setPasswordVisible((prev) => !prev)
@@ -14,16 +17,27 @@ const Login = () => {
     password: ""
     })
 
-   const handleSubmit = (e) => {
-    e.preventDefault()
+const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    console.log(formData)
+    setError("");
 
-    setFormData({
-        email: "",
-        password: ""
-    })
+    try {
+        const response = await loginUser(formData);
+
+        console.log(response.message);
+
+        setFormData({
+            email: "",
+            password: ""
+        });
+
+        navigate('/dashboard');
+
+    } catch (error) {
+        setError(error.message);
     }
+};
 
     return (
         <main className="min-h-screen bg-black text-white flex items-center justify-center px-4">
@@ -50,7 +64,7 @@ const Login = () => {
                         <input
                             type="email"
                             id="email"
-                            require
+                            required
                             placeholder="Enter your email"
                             value={formData.email}
                             onChange={(e) =>
@@ -70,7 +84,7 @@ const Login = () => {
                             <input
                                 type={passwordVisible ? "text" : "password"}
                                 id="password"
-                                require
+                                required
                                 placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={(e) =>
@@ -90,7 +104,11 @@ const Login = () => {
                             </button>
                         </div>
                     </div>
-
+                    {error && (
+                        <p className="text-red-500 text-sm">
+                            {error}
+                        </p>
+                    )}
                     <button type="submit"
                         className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition-colors">
                         Login

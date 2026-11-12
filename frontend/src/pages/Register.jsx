@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { registerUser } from '../services/authServices';
 
 const Register = () => {
 
@@ -12,12 +13,13 @@ const Register = () => {
         password: "",
         confirmPassword: ""
     })
+    const navigate = useNavigate()
 
     const togglePassword = () => {
         setPasswordVisible((prev) => !prev)
     }
 
-   const handleSubmit = (e) => {
+   const handleSubmit = async(e) => {
     e.preventDefault()
 
     if (!formData.password || !formData.confirmPassword) {
@@ -29,22 +31,29 @@ const Register = () => {
         setError("Passwords do not match.")
         return
     }
-
     setError("")
-
-    console.log({
+    try {
+    const response = await registerUser({
         name: formData.name,
         email: formData.email,
         password: formData.password
-    })
+    });
+    setError("");
 
     setFormData({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
-    })
-}
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+    alert(response.message);
+    navigate('/dashboard')
+    } catch (error) {
+        setError(error.message);
+    }
+
+    }
+
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
 
     const toggleConfirmPassword = () => {
@@ -78,7 +87,7 @@ const Register = () => {
                             type="text"
                             id="name"
                             placeholder="Enter your full name"
-                            require
+                            required
                             value={formData.name}
                             onChange={(e) =>
                                 setFormData((prev) => ({

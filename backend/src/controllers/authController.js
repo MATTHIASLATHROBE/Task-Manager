@@ -18,6 +18,13 @@ const createUser = async (req, res) => {
         const newUser = new User({ name, email: normalizedEmail, password });
         await newUser.save();
 
+        const token = userToken(newUser._id);
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: true
+        });
+
         res.status(201).json({ message: "User created successfully", user: {name: newUser.name, email: newUser.email} });
     }
 
@@ -78,7 +85,7 @@ const logoutUser = (req, res) => {
 
 const getUser = async (req, res) => {
         try{
-        const userId = req.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId).select('-password');
         if (!user) {
             return res.status(404).json({ message: "User not found" });

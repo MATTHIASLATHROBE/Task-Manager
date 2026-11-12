@@ -1,11 +1,14 @@
+
+import { Outlet } from 'react-router-dom'
 import Nav from './Nav'
 
-
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
     return (
         <>
-            <Nav/>
-            <main>{children}</main>
+            <Nav />
+            <main>
+                <Outlet />
+            </main>
         </>
     )
 }
