@@ -1,0 +1,25 @@
+{
+  "name": "task_manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MATTHIASLATHROBE/Task-Manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MATTHIASLATHROBE/Task-Manager/issues"
+  },
+  "homepage": "https://github.com/MATTHIASLATHROBE/Task-Manager#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
