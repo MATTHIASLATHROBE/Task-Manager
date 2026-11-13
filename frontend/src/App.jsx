@@ -10,6 +10,10 @@ import Dashboard from './pages/DashBoard.jsx'
 import MyTask from './pages/MyTasks.jsx'
 import ProtectedRoute from './component/routes/ProtectedRoute.jsx'
 import TaskDetails from './pages/TaskDetails.jsx'
+import AdminUsers from './pages/adminPages/AdminUser.jsx'
+import AdminUserDetails from './pages/adminPages/AdminUserDetails.jsx';
+import AdminLayout from './pages/adminPages/AdminLayout';
+
 
 import {
     getTasks,
@@ -305,6 +309,19 @@ const toggleTask = async (id) => {
                             />
                         }
                     />
+                </Route>
+               <Route
+                        path="/admin"
+                        element={
+                            authUser?.isAdmin ? (
+                                <AdminLayout />
+                            ) : (
+                                <Navigate to="/dashboard" replace />
+                            )
+                        }
+                    >
+                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="users/:userId" element={<AdminUserDetails />} />
                 </Route>
             </Route>
         </Routes>

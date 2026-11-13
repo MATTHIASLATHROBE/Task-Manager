@@ -55,7 +55,7 @@ const getUserDetails = async (req, res) => {
 // Get all tasks belonging to a selected user
 const getUserTasks = async (req, res) => {
     try {
-        const userId = req.params.id.trim();
+        const userId = req.params.id;
 
         const user = await User.findById(userId);
 
@@ -83,8 +83,45 @@ const getUserTasks = async (req, res) => {
     }
 };
 
-export {
+// Get overall admin dashboard statistics
+const getDashboardStats = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+
+        const totalTasks = await Task.countDocuments();
+
+        const completedTasks = await Task.countDocuments({
+            done: true
+        });
+
+        const pendingTasks = await Task.countDocuments({
+            done: false
+        });
+
+        res.status(200).json({
+            message: "Dashboard statistics fetched successfully",
+            stats: {
+                totalUsers,
+                totalTasks,
+                completedTasks,
+                pendingTasks
+            }
+        });
+
+    } catch (error) {
+        console.error("Error fetching dashboard statistics:", error);
+
+        res.status(500).json({
+            message: "Error fetching dashboard statistics"
+        });
+    }
+};
+
+export{
     getAllUsers,
     getUserDetails,
-    getUserTasks
+    getUserTasks,
+    getDashboardStats
 };
+
+
