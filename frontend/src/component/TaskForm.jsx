@@ -13,6 +13,7 @@ const TaskForm = ({
         description: editingTask?.description || "",
         note: editingTask?.note || ""
     })
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -23,15 +24,18 @@ const TaskForm = ({
         }))
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
         if (!form.taskName.trim()) return
 
+    try {
+        setIsSubmitting(true)
+
         if (editingTask) {
-            onUpdateTask(editingTask.id, form)
+            await onUpdateTask(editingTask._id, form)
         } else {
-            onAddTask(form)
+            await onAddTask(form)
         }
 
         setForm({
@@ -39,7 +43,13 @@ const TaskForm = ({
             description: "",
             note: ""
         })
+    } catch {
+        // Keep the form open if the request fails.
+    } finally {
+        setIsSubmitting(false)
     }
+    }
+        
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -72,21 +82,26 @@ const TaskForm = ({
             />
 
             <div className="flex gap-3">
-                <button
-                    type="submit"
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-                >
-                    {editingTask ? "Save Changes" : "Add Task"}
-                </button>
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isSubmitting
+                    ? editingTask ? "Updating..." : "Creating..."
+                    : editingTask ? "Save Changes" : "Add Task"
+                }
+            </button>
 
                 {editingTask && (
-                    <button
-                        type="button"
-                        onClick={onCancelEdit}
-                        className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-                    >
-                        Cancel
-                    </button>
+                <button
+                    type="button"
+                    onClick={onCancelEdit}
+                    disabled={isSubmitting}
+                    className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Cancel
+                </button>
                 )}
             </div>
 

@@ -1,28 +1,52 @@
 
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import TaskForm from '../component/TaskForm'
 import TaskList from '../component/TaskList'
 
 const MyTasks = ({
     tasks,
+    loading,
+    clearSuccessMessage,
+    fetchError,
+    actionError,
     addTask,
     updateTask,
     toggleTask,
     deleteTask,
-    deleteCompletedTasks
+    successMessage,
+    deleteCompletedTasks,
+    isDeletingCompleted,
+    togglingTaskId,
+    deletingTaskId
 }) => {
 
-    const { taskId } = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
 
-    const [showForm, setShowForm] = useState(false)
-    const [editingTask, setEditingTask] = useState(null)
-    const [expandedTaskId, setExpandedTaskId] = useState(taskId || null)
+    const handleTaskClick = (id) => {
+        navigate(`/tasks/${id}`)
+    }
+
+   const [showForm, setShowForm] = useState(
+    () => Boolean(location.state?.openCreateForm)
+)
+
+    const [editingTask, setEditingTask] = useState(null)    
     const [activeFilter, setActiveFilter] = useState('all')
 
+   useEffect(() => {
+    if (location.state?.openCreateForm) {
+        navigate(location.pathname, {
+            replace: true,
+            state: null
+        })
+    }
+}, [location.state, location.pathname, navigate])
+
     // Create a new task
-    const handleAddTask = (formData) => {
-        addTask(formData)
+    const handleAddTask = async (formData) => {
+        await addTask(formData)
         setShowForm(false)
     }
 
@@ -33,11 +57,11 @@ const MyTasks = ({
     }
 
     // Save changes to an existing task
-    const handleUpdateTask = (id, formData) => {
-        updateTask(id, formData)
-        setEditingTask(null)
-        setShowForm(false)
-    }
+const handleUpdateTask = async (id, formData) => {
+    await updateTask(id, formData)
+    setEditingTask(null)
+    setShowForm(false)
+}
 
     // Cancel editing
     const handleCancelEdit = () => {
@@ -45,14 +69,7 @@ const MyTasks = ({
         setShowForm(false)
     }
 
-    // Open or close task details
-    const handleExpandTask = (id) => {
-        setExpandedTaskId(prev =>
-            prev === String(id) ? null : String(id)
-        )
-    }
-
-    // Filter tasks based on the selected filter
+    // Filter tasks based on selected filter
     const filteredTasks = tasks.filter(task => {
 
         if (activeFilter === 'pending') {
@@ -65,6 +82,16 @@ const MyTasks = ({
 
         return true
     })
+
+useEffect(() => {
+    if (!successMessage) return
+
+    const timer = setTimeout(() => {
+        clearSuccessMessage()
+    }, 3000)
+
+    return () => clearTimeout(timer)
+}, [successMessage, clearSuccessMessage])  
 
     return (
         <main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 md:px-12">
@@ -116,8 +143,8 @@ const MyTasks = ({
 
                         </div>
 
-                       <TaskForm
-                            key={editingTask?.id ?? 'new-task'}
+                        <TaskForm
+                            key={editingTask?._id ?? 'new-task'}
                             onAddTask={handleAddTask}
                             onUpdateTask={handleUpdateTask}
                             editingTask={editingTask}
@@ -125,6 +152,18 @@ const MyTasks = ({
                         />
 
                     </section>
+                )}
+
+                {/* Action Error Message */}
+                {actionError && (
+                    <p className="text-red-400 mb-4">
+                        {actionError}
+                    </p>
+                )}
+                {successMessage && (
+                    <p className="text-green-400 mb-4" role="status">
+                        {successMessage}
+                    </p>
                 )}
 
                 {/* Task List */}
@@ -181,21 +220,30 @@ const MyTasks = ({
                     </div>
 
                     {/* Display Filtered Tasks */}
-                    {filteredTasks.length > 0 ? (
+                    {loading ? (
+                        <p className="text-gray-400 text-center py-12">
+                            Loading your tasks...
+                        </p>
+                    ) : fetchError ? (
+                        <p className="text-red-400 text-center py-12">
+                            {fetchError}
+                        </p>
+                    ) : filteredTasks.length > 0 ? (
 
-                        <TaskList
-                            tasks={filteredTasks}
-                            onToggle={toggleTask}
-                            onDelete={deleteTask}
-                            onEdit={handleEditTask}
-                            expandedTaskId={expandedTaskId}
-                            onExpand={handleExpandTask}
-                        />
+                    <TaskList
+                        tasks={filteredTasks}
+                        onToggle={toggleTask}
+                        onDelete={deleteTask}
+                        onEdit={handleEditTask}
+                        togglingTaskId={togglingTaskId}
+                        deletingTaskId={deletingTaskId}
+                        clickable={true}
+                        onTaskClick={handleTaskClick}
+                    />
 
                     ) : (
 
                         <div className="text-center py-12">
-
                             <p className="text-gray-400">
                                 {activeFilter === 'pending'
                                     ? 'No pending tasks.'
@@ -204,9 +252,7 @@ const MyTasks = ({
                                     : "You haven't added any tasks yet."
                                 }
                             </p>
-
                         </div>
-
                     )}
 
                 </section>
@@ -215,12 +261,16 @@ const MyTasks = ({
                 {tasks.some(task => task.done) && (
                     <div className="flex justify-end mt-6">
 
-                        <button
-                            onClick={deleteCompletedTasks}
-                            className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                        >
-                            Delete All Completed Tasks
-                        </button>
+                <button
+                    onClick={deleteCompletedTasks}
+                    disabled={isDeletingCompleted}
+                    className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isDeletingCompleted
+                        ? "Deleting..."
+                        : "Delete All Completed Tasks"
+                    }
+                </button>
 
                     </div>
                 )}

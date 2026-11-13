@@ -1,29 +1,15 @@
 
-import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { getCurrentUser } from '../../services/authServices'
 
-const ProtectedRoute = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(null)
+const ProtectedRoute = ({ authUser, authLoading }) => {
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await getCurrentUser()
-                setIsAuthenticated(true)
-            } catch {
-                setIsAuthenticated(false)
-            }
-        }
-
-        checkAuth()
-    }, [])
-
-    if (isAuthenticated === null) {
+    // Wait until App.jsx finishes checking authentication
+    if (authLoading) {
         return <p>Checking authentication...</p>
     }
 
-    return isAuthenticated
+    // Redirect unauthenticated users to login
+    return authUser
         ? <Outlet />
         : <Navigate to="/login" replace />
 }

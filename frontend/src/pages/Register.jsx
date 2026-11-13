@@ -1,11 +1,14 @@
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerUser } from '../services/authServices';
+import { registerUser } from '../services/authServices'
 
-const Register = () => {
+const Register = ({ onRegisterSuccess }) => {
 
     const [passwordVisible, setPasswordVisible] = useState(false)
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
     const [error, setError] = useState("")
+    const [isRegistering, setIsRegistering] = useState(false)
 
     const [formData, setFormData] = useState({
         name: "",
@@ -13,53 +16,60 @@ const Register = () => {
         password: "",
         confirmPassword: ""
     })
+
     const navigate = useNavigate()
 
     const togglePassword = () => {
         setPasswordVisible((prev) => !prev)
     }
 
-   const handleSubmit = async(e) => {
-    e.preventDefault()
-
-    if (!formData.password || !formData.confirmPassword) {
-        setError("Please enter and confirm your password.")
-        return
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match.")
-        return
-    }
-    setError("")
-    try {
-    const response = await registerUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-    });
-    setError("");
-
-    setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-    });
-    alert(response.message);
-    navigate('/dashboard')
-    } catch (error) {
-        setError(error.message);
-    }
-
-    }
-
-    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
-
     const toggleConfirmPassword = () => {
         setConfirmPasswordVisible((prev) => !prev)
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        if (!formData.password || !formData.confirmPassword) {
+            setError("Please enter and confirm your password.")
+            return
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match.")
+            return
+        }
+
+        setError("")
+        setIsRegistering(true)
+
+        try {
+            const response = await registerUser({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            })
+
+            // Synchronize the shared authentication state
+            await onRegisterSuccess()
+
+            setFormData({
+                name: "",
+                email: "",
+                password: "",
+                confirmPassword: ""
+            })
+
+            alert(response.message)
+            navigate('/dashboard')
+
+        } catch (error) {
+            setError(error.message)
+
+        } finally {
+            setIsRegistering(false)
+        }
+    }
 
     return (
         <main className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-8">
@@ -181,6 +191,7 @@ const Register = () => {
                             </button>
                         </div>
                     </div>
+
                     {error && (
                         <p className="text-red-500 text-sm">
                             {error}
@@ -189,10 +200,12 @@ const Register = () => {
 
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-3 rounded-md font-medium hover:bg-green-700 transition-colors"
+                        disabled={isRegistering}
+                        className="w-full bg-green-600 text-white py-3 rounded-md font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Create Account
+                        {isRegistering ? "Creating account..." : "Create Account"}
                     </button>
+
                     <p className="text-center text-sm text-gray-400">
                         Already have an account?{" "}
                         <Link
@@ -202,6 +215,7 @@ const Register = () => {
                             Log in
                         </Link>
                     </p>
+
                 </form>
 
             </section>

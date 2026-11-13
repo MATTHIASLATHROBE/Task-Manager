@@ -2,11 +2,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { loginUser } from '../services/authServices'
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
 
     const [passwordVisible, setPasswordVisible] = useState(false)
     const navigate = useNavigate();
     const [error, setError] = useState("");
+    const [isLoggingIn, setIsLoggingIn] = useState(false)
 
     const togglePassword = () => {
     setPasswordVisible((prev) => !prev)
@@ -21,11 +22,14 @@ const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
+    setIsLoggingIn(true);
 
     try {
         const response = await loginUser(formData);
 
         console.log(response.message);
+
+        await onLoginSuccess();
 
         setFormData({
             email: "",
@@ -36,6 +40,9 @@ const handleSubmit = async (e) => {
 
     } catch (error) {
         setError(error.message);
+
+    } finally {
+        setIsLoggingIn(false);
     }
 };
 
@@ -109,9 +116,12 @@ const handleSubmit = async (e) => {
                             {error}
                         </p>
                     )}
-                    <button type="submit"
-                        className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition-colors">
-                        Login
+                    <button
+                        type="submit"
+                        disabled={isLoggingIn}
+                        className="w-full bg-green-600 text-white py-3 rounded-md font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isLoggingIn ? "Logging in..." : "Login"}
                     </button>
 
                     <p className="text-sm text-gray-400 text-center">

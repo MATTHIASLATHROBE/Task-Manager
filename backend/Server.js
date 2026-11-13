@@ -14,7 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'http://10.207.15.233:5173'
+        'http://10.207.15.233:5173',
+        'http://10.31.15.134:5173'
     ],
     credentials: true
 }));
@@ -24,6 +25,6 @@ app.get("/",(req,res)=>{
 })
 
 app.use("/api/auth/users", userRoutes);  
-app.use("/api/", taskRoutes);
+app.use("/api", taskRoutes);
 
 connectDB(app);

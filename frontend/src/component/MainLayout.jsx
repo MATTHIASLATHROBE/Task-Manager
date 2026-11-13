@@ -2,10 +2,11 @@
 import { Outlet } from 'react-router-dom'
 import Nav from './Nav'
 
-const MainLayout = () => {
+const MainLayout = ({ onLogoutSuccess }) => {
     return (
         <>
-            <Nav />
+            <Nav onLogoutSuccess={onLogoutSuccess} />
+
             <main>
                 <Outlet />
             </main>

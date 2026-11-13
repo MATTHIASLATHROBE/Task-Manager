@@ -1,26 +1,26 @@
-import { Link, useNavigate } from 'react-router-dom'
 
-import TaskForm from '../component/TaskForm'
+import { Link, useNavigate } from 'react-router-dom'
 import TaskList from '../component/TaskList'
 import TaskStats from '../component/TaskStats'
 
 const Dashboard = ({
     tasks,
-    addTask,
-    toggleTask,
-    deleteTask,
+    loading,
+    fetchError,
+    actionError,
     totalTasks,
     completedTasks,
-    pendingTasks
+    pendingTasks,
+    toggleTask,
+    deleteTask
 }) => {
 
     const navigate = useNavigate()
-    // Navigate to My Tasks with the selected task ID
+
+    // Navigate to the selected task's details page
     const openTask = (taskId) => {
         navigate(`/tasks/${taskId}`)
     }
-
-    
 
     return (
         <main className="min-h-screen bg-black text-white px-4 py-8 sm:px-6 md:px-12">
@@ -58,15 +58,17 @@ const Dashboard = ({
                     />
                 </section>
 
-                {/* Add Task */}
-                <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
-
-                    <h2 className="text-xl font-semibold mb-4">
-                        Create a New Task
-                    </h2>
-
-                    <TaskForm onAddTask={addTask} />
-
+                {/* Create Task Button */}
+                <section className="mb-8">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/tasks', {
+                            state: { openCreateForm: true }
+                        })}
+                        className="bg-green-600 hover:bg-green-700 transition-colors text-white px-5 py-3 rounded-lg font-medium"
+                    >
+                        + Create Task
+                    </button>
                 </section>
 
                 {/* Recent Tasks */}
@@ -82,8 +84,25 @@ const Dashboard = ({
                             {totalTasks} tasks
                         </span>
 
-                    </div>                   
-                    {tasks.length > 0 ? (
+                    </div>
+
+                    {/* Action Error */}
+                    {actionError && (
+                        <p className="text-red-400 mb-4">
+                            {actionError}
+                        </p>
+                    )}
+
+                    {/* Task List States */}
+                    {loading ? (
+                        <p className="text-gray-400 text-center py-8">
+                            Loading your tasks...
+                        </p>
+                    ) : fetchError ? (
+                        <p className="text-red-400 text-center py-8">
+                            {fetchError}
+                        </p>
+                    ) : tasks.length > 0 ? (
                         <TaskList
                             tasks={tasks}
                             onToggle={toggleTask}
@@ -96,6 +115,7 @@ const Dashboard = ({
                             No tasks available yet. Create your first task!
                         </p>
                     )}
+
                 </section>
 
             </div>

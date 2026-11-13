@@ -1,4 +1,3 @@
-
 import TaskItem from './TaskItem'
 
 const TaskList = ({
@@ -8,23 +7,23 @@ const TaskList = ({
     onEdit,
     clickable = false,
     onTaskClick,
-    expandedTaskId,
-    onExpand
+    togglingTaskId,
+    deletingTaskId
 }) => {
 
     return (
         <div className="flex flex-col gap-4">
             {tasks.map((task) => (
                 <TaskItem
-                    key={task.id}
+                    key={task._id}
                     task={task}
                     onToggle={onToggle}
                     onDelete={onDelete}
                     onEdit={onEdit}
                     clickable={clickable}
+                    isToggling={togglingTaskId === task._id}
+                    isDeleting={deletingTaskId === task._id}
                     onTaskClick={onTaskClick}
-                    isExpanded={String(task.id) === expandedTaskId}
-                    onExpand={() => onExpand(task.id)}
                 />
             ))}
         </div>

@@ -7,19 +7,30 @@ const TaskItem = ({
     clickable = false,
     onTaskClick,
     isExpanded = false,
-    onExpand
+    onExpand,
+    isToggling = false,
+    isDeleting = false
 }) => {
 
     const handleTaskClick = () => {
         if (clickable) {
-            onTaskClick(task.id)
+            onTaskClick(task._id)
         } else {
-            onExpand(task.id)
+            onExpand(task._id)
         }
     }
 
+    const isBusy = isToggling || isDeleting
+
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-black border border-gray-800 rounded-lg px-4 py-3">
+        <div
+            onClick={clickable ? handleTaskClick : undefined}
+            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-black border border-gray-800 rounded-lg px-4 py-3 transition-colors ${
+                clickable
+                    ? "cursor-pointer hover:border-green-500/50"
+                    : ""
+            }`}
+        >
 
             {/* Task Details */}
             <div className="flex-1 min-w-0">
@@ -28,7 +39,10 @@ const TaskItem = ({
 
                     <button
                         type="button"
-                        onClick={handleTaskClick}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleTaskClick()
+                        }}
                         className={`text-left text-base font-medium break-words ${
                             task.done
                                 ? "text-gray-500 line-through"
@@ -70,10 +84,13 @@ const TaskItem = ({
             {/* Action Buttons */}
             <div className="flex gap-2 shrink-0">
 
-                {!clickable && (
+                {onEdit && (
                     <button
                         type="button"
-                        onClick={() => onEdit(task)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit(task)
+                        }}
                         className="bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
                     >
                         Edit
@@ -82,18 +99,26 @@ const TaskItem = ({
 
                 <button
                     type="button"
-                    onClick={() => onToggle(task.id)}
-                    className="bg-green-600/15 hover:bg-green-600/25 text-green-400 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        onToggle(task._id)
+                    }}
+                    disabled={isBusy}
+                    className="bg-green-600/15 hover:bg-green-600/25 text-green-400 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {task.done ? "Undo" : "Complete"}
+                    {isToggling ? "Updating..." : task.done ? "Undo" : "Complete"}
                 </button>
 
                 <button
                     type="button"
-                    onClick={() => onDelete(task.id)}
-                    className="bg-red-600/15 hover:bg-red-600/25 text-red-400 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        onDelete(task._id)
+                    }}
+                    disabled={isBusy}
+                    className="bg-red-600/15 hover:bg-red-600/25 text-red-400 px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Delete
+                    {isDeleting ? "Deleting..." : "Delete"}
                 </button>
 
             </div>

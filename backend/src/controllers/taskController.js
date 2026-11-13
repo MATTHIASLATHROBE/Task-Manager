@@ -8,7 +8,7 @@ const createTask = async (req, res) => {
         const task = new Task({taskName, description, note, user});
         await task.save();
 
-        res.status(201).json({ message: "Task created successfully", task: {taskName: task.taskName, description: task.description, note: task.note, done: task.done} });
+        res.status(201).json({ message: "Task created successfully", task});
     }
     catch(err){
         res.status(500).json({ message: "Error creating task" });
@@ -19,10 +19,13 @@ const createTask = async (req, res) => {
 const getTasks = async (req, res) => {
     try{
         const userId = req.user._id;
-        const tasks = await Task.find({ user: userId });
+        const tasks = await Task.find({ user: userId }).sort({ createdAt: -1 })
 
-        if (!tasks || tasks.length === 0) {
-            return res.status(404).json({ message: "Please Create A Task" });
+        if (tasks.length === 0) {
+        return res.status(200).json({
+            message: "No tasks found",
+            tasks: []
+        });
         }
 
         res.status(200).json({ message: "Tasks fetched successfully", tasks });
@@ -63,7 +66,7 @@ const updateTask = async (req, res) => {
     }
 
     // Validate the submitted fields before changing the task.
-    const { taskName, description, note, done } = req.body;
+    const { taskName, description, note} = req.body;
 
     if (
       taskName !== undefined &&

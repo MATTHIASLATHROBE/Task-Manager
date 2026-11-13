@@ -3,34 +3,37 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { logoutUser } from '../services/authServices'
 
-const Navbar = () => {
+const Navbar = ({ onLogoutSuccess }) => {
     const [menuOpen, setMenuOpen] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [error, setError] = useState("")
 
     const navigate = useNavigate()
 
-    const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'My Tasks', path: '/tasks' }
-    ]
+const navLinks = [
+    { name: 'Dashboard', path: '/dashboard' },
+    { name: 'My Tasks', path: '/tasks' }
+]
 
-    const handleLogout = async () => {
-        try {
-            setIsLoggingOut(true)
-            setError("")
+const handleLogout = async () => {
+    try {
+        setIsLoggingOut(true)
+        setError("")
 
-            await logoutUser()
+        await logoutUser()
 
-            setMenuOpen(false)
-            navigate('/login', { replace: true })
+        // Clear authentication and task state in App.jsx
+        onLogoutSuccess()
 
-        } catch (error) {
-            setError(error.message)
-        } finally {
-            setIsLoggingOut(false)
-        }
+        setMenuOpen(false)
+        navigate('/login', { replace: true })
+
+    } catch (error) {
+        setError(error.message)
+    } finally {
+        setIsLoggingOut(false)
     }
+}
 
     return (
         <nav className="bg-black text-white px-6 sm:px-8 py-5">
