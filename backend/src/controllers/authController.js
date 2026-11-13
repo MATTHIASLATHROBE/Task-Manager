@@ -18,7 +18,7 @@ const createUser = async (req, res) => {
         const newUser = new User({ name, email: normalizedEmail, password });
         await newUser.save();
 
-        const token = userToken(newUser._id);
+        const token = userToken(newUser);
         res.cookie('token', token, {
             httpOnly: true,
             secure: false,
@@ -53,7 +53,8 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = userToken(user._id);
+        const token = userToken(user);
+        
 
         res.cookie('token', token,{
             httpOnly: true, 

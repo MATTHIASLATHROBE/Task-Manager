@@ -1,16 +1,29 @@
+
 import jwt from "jsonwebtoken";
 
-const userToken = (userId) => {
-    try{
-        const token = jwt.sign({ _id: userId }, process.env.JWT_TOKEN, {expiresIn: "5h"});
+// Generate JWT token
+const userToken = (user) => {
+    try {
+        const token = jwt.sign(
+            {
+                _id: user._id,
+                name: user.name,
+                isAdmin: user.isAdmin
+            },
+            process.env.JWT_TOKEN,
+            { expiresIn: "5h" }
+        );
+
         return token;
-    }
-    catch (error) {
+
+    } catch (error) {
         console.error(error);
         throw new Error("Error generating token");
     }
 };
 
+
+// Verify JWT token
 const verifyToken = (req, res, next) => {
     try {
         const token = req.cookies?.token;
@@ -36,5 +49,18 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-export { userToken, verifyToken };
 
+// Verify admin privileges
+const verifyAdmin = (req, res, next) => {
+
+    if (!req.user?.isAdmin) {
+        return res.status(403).json({
+            message: "Access denied. Admin privileges required."
+        });
+    }
+
+    next();
+};
+
+
+export { userToken, verifyToken, verifyAdmin };
