@@ -11,9 +11,9 @@ const connectDB = async (app) => {
         await mongoose.connect(MONGO_URI);
         console.log("MongoDB connected successfully");
 
-        app.listen(PORT, 
-            console.log(`Server running in development mode on  http://localhost:${PORT}`)
-        );  
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    }); 
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
         process.exit(1);
