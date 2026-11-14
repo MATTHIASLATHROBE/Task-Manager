@@ -18,6 +18,7 @@ const Login = ({ onLoginSuccess }) => {
     password: ""
     })
 
+
 const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -25,18 +26,16 @@ const handleSubmit = async (e) => {
     setIsLoggingIn(true);
 
     try {
-        const response = await loginUser(formData);
+        await loginUser(formData);
 
-        console.log(response.message);
-
-        await onLoginSuccess();
+        const response = await onLoginSuccess();
 
         setFormData({
             email: "",
             password: ""
         });
 
-        navigate('/dashboard');
+        navigate(response.user.isAdmin ? '/admin' : '/dashboard');
 
     } catch (error) {
         setError(error.message);
@@ -45,6 +44,7 @@ const handleSubmit = async (e) => {
         setIsLoggingIn(false);
     }
 };
+
 
     return (
         <main className="min-h-screen bg-black text-white flex items-center justify-center px-4">

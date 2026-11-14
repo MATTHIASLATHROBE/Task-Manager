@@ -7,10 +7,23 @@ const getAllUsers = async (req, res) => {
     try {
         const users = await User.find().select("-password");
 
+        const usersWithTaskCount = await Promise.all(
+            users.map(async (user) => {
+                const taskCount = await Task.countDocuments({
+                    user: user._id
+                });
+
+                return {
+                    ...user.toObject(),
+                    taskCount
+                };
+            })
+        );
+
         res.status(200).json({
             message: "Users fetched successfully",
-            count: users.length,
-            users
+            count: usersWithTaskCount.length,
+            users: usersWithTaskCount
         });
 
     } catch (error) {
