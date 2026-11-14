@@ -21,8 +21,8 @@ const createUser = async (req, res) => {
         const token = userToken(newUser);
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false,
-            sameSite: true
+            secure: true,
+            sameSite: 'none'
         });
 
         res.status(201).json({ message: "User created successfully", user: {name: newUser.name, email: newUser.email} });
