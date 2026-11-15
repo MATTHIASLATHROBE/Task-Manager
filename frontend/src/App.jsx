@@ -10,6 +10,7 @@ import Dashboard from './pages/DashBoard.jsx';
 import MyTask from './pages/MyTasks.jsx';
 import ProtectedRoute from './component/routes/ProtectedRoute.jsx';
 import TaskDetails from './pages/TaskDetails.jsx';
+import LoadingScreen from './component/LoadingScreen.jsx';
 
 import AdminUserDetails from './pages/adminPages/AdminUserDetails.jsx';
 import AdminLayout from './pages/adminPages/AdminLayout.jsx';
@@ -221,7 +222,7 @@ const App = () => {
                 path="/"
                 element={
                     authLoading ? (
-                        <p>Checking authentication...</p>
+                        <LoadingScreen />
                     ) : authUser ? (
                         <Navigate
                             to={authUser.isAdmin ? '/admin' : '/dashboard'}

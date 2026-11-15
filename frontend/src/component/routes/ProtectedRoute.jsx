@@ -1,12 +1,13 @@
 
 import { Navigate, Outlet } from 'react-router-dom';
+import LoadingScreen from '../LoadingScreen';
 
 const ProtectedRoute = ({ authUser, authLoading, allowedRole }) => {
 
     // Wait until authentication check is complete
-    if (authLoading) {
-        return <p>Checking authentication...</p>;
-    }
+ if (authLoading) {
+    return <LoadingScreen />;
+}
 
     // User must be logged in
     if (!authUser) {
