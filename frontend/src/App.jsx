@@ -11,6 +11,8 @@ import MyTask from './pages/MyTasks.jsx';
 import ProtectedRoute from './component/routes/ProtectedRoute.jsx';
 import TaskDetails from './pages/TaskDetails.jsx';
 import LoadingScreen from './component/LoadingScreen.jsx';
+import Profile from './pages/Profile.jsx';
+
 
 import AdminUserDetails from './pages/adminPages/AdminUserDetails.jsx';
 import AdminLayout from './pages/adminPages/AdminLayout.jsx';
@@ -26,8 +28,11 @@ import {
     deleteCompletedTasks as deleteCompletedTasksRequest
 } from './services/taskServices.jsx';
 
-import { getCurrentUser } from './services/authServices';
-
+import {
+    getCurrentUser,
+    updateProfile,
+    deleteUser
+} from './services/authServices';
 const App = () => {
     // Authentication state
     const [authUser, setAuthUser] = useState(null);
@@ -215,6 +220,22 @@ const App = () => {
     const completedTasks = tasks.filter(task => task.done).length;
     const pendingTasks = tasks.filter(task => !task.done).length;
 
+
+    // Update the authenticated user's profile
+    const handleProfileUpdate = async (profileData) => {
+        const response = await updateProfile(profileData);
+
+        setAuthUser(response.user);
+
+        return response;
+    };
+
+    const handleAccountDelete = async (userId) => {
+        await deleteUser(userId);
+        handleLogoutSuccess();
+    };
+
+
     return (
         <Routes>
             {/* Public routes */}
@@ -261,6 +282,7 @@ const App = () => {
                 <Route
                     element={
                         <MainLayout
+                            authUser={authUser}
                             onLogoutSuccess={handleLogoutSuccess}
                         />
                     }
@@ -315,6 +337,10 @@ const App = () => {
                                 pendingTasks={pendingTasks}
                             />
                         }
+                    />
+                    <Route
+                        path="/profile"
+                        element={<Profile authUser={authUser} onProfileUpdate={handleProfileUpdate} onDeleteAccount={handleAccountDelete}/>}
                     />
                 </Route>
             </Route>

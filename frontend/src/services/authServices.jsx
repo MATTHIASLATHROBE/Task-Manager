@@ -24,3 +24,16 @@ export const logoutUser = () => {
         method: 'POST'
     });
 };
+
+export const updateProfile = (profileData) => {
+    return apiRequest('/auth/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify(profileData)
+    });
+};
+
+export const deleteUser = (userId) => {
+    return apiRequest(`/auth/users/${userId}`, {
+        method: 'DELETE'
+    });
+};
