@@ -1,5 +1,6 @@
 import User from "../models/Users.js";
 import Task from "../models/Task.js";
+import cloudinary from "../config/cloudinary.js";
 import { userToken } from "../middleware/authMiddleware.js";
 
 const createUser = async (req, res) => {
@@ -223,4 +224,75 @@ const updateProfile = async (req, res) => {
     }
 };
 
-export { createUser, loginUser, logoutUser, getUser, deleteUser, updateProfile };
+const uploadProfilePhoto = async (req, res) => {
+    try {
+        // Check whether an image was uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Please select an image"
+            });
+        }
+
+        // Upload the image buffer to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "task-manager/profile-photos",
+                    resource_type: "image"
+                },
+                (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                }
+            );
+
+            stream.end(req.file.buffer);
+        });
+
+        // Find the logged-in user
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Save the new photo details
+        user.profilePhoto = result.secure_url;
+        user.profilePhotoPublicId = result.public_id;
+
+        await user.save();
+
+        // Return updated user information
+        return res.status(200).json({
+            message: "Profile photo uploaded successfully",
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                profilePhoto: user.profilePhoto
+            }
+        });
+
+    } catch (error) {
+        console.error("Profile photo upload error:", error);
+
+        return res.status(500).json({
+            message: "Error uploading profile photo"
+        });
+    }
+};
+
+export {
+    createUser,
+    loginUser,
+    logoutUser,
+    getUser,
+    deleteUser,
+    updateProfile,
+    uploadProfilePhoto
+};

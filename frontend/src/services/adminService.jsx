@@ -15,3 +15,9 @@ export const getUserTasks = (userId) => {
 export const getDashboardStats = () => {
     return apiRequest('/admin/dashboard/stats');
 };
+
+export const deleteUser = (userId) => {
+    return apiRequest(`/admin/users/${userId}`, {
+        method: 'DELETE'
+    });
+};

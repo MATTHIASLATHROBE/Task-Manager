@@ -1,7 +1,20 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { logoutUser } from '../services/authServices';
 
-const Profile = ({ authUser, onProfileUpdate, onDeleteAccount }) => {
+const Profile = ({
+    authUser,
+    onProfileUpdate,
+    onDeleteAccount,
+    onProfilePhotoUpload,
+    onLogoutSuccess
+}) => {
+    const navigate = useNavigate();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [logoutError, setLogoutError] = useState('');
+
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(authUser?.name || '');
     const [email, setEmail] = useState(authUser?.email || '');
@@ -11,6 +24,10 @@ const Profile = ({ authUser, onProfileUpdate, onDeleteAccount }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    const [isUploading, setIsUploading] = useState(false);
+    const [photoError, setPhotoError] = useState('');
+    const [showPhotoPreview, setShowPhotoPreview] = useState(false);
 
 
     // Save updated profile information
@@ -42,7 +59,25 @@ const Profile = ({ authUser, onProfileUpdate, onDeleteAccount }) => {
         setIsEditing(false);
     };
 
-const handleDeleteAccount = async () => {
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        setPhotoError('');
+        setIsUploading(true);
+
+        try {
+            await onProfilePhotoUpload(file);
+        } catch (error) {
+            setPhotoError(error.message || 'Failed to upload profile photo.');
+        } finally {
+            setIsUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleDeleteAccount = async () => {
         setError('');
         setIsDeleting(true);
 
@@ -53,6 +88,23 @@ const handleDeleteAccount = async () => {
             setIsDeleting(false);
             setShowDeleteConfirm(false);
         }
+    };
+
+    const handleLogout = async () => {
+    setLogoutError('');
+    setIsLoggingOut(true);
+
+    try {
+        await logoutUser();
+        onLogoutSuccess?.();
+        navigate('/login', { replace: true });
+    } catch (error) {
+        setLogoutError(
+            error.message || 'Unable to log out. Please try again.'
+        );
+    } finally {
+        setIsLoggingOut(false);
+    }
     };
 
     const initials = authUser?.name
@@ -76,13 +128,66 @@ const handleDeleteAccount = async () => {
 
                 <div className="mt-8 p-6 rounded-2xl border border-white/10 bg-zinc-950">
 
-                    <div className="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-black text-xl font-bold">
-                        {initials}
+
+                <div className="flex items-center gap-5">
+
+                        <div className="relative w-20 h-20">
+
+                            {/* Profile image */}
+                            <div className="w-full h-full rounded-full overflow-hidden bg-emerald-500 flex items-center justify-center text-black text-xl font-bold">
+                                {authUser?.profilePhoto ? (
+                                   <button
+                                        type="button"
+                                        onClick={() => setShowPhotoPreview(true)}
+                                        className="cursor-zoom-in"
+                                        aria-label="View profile photo"
+                                    >
+                                        <img
+                                            src={authUser?.profilePhoto}
+                                            alt="Profile"
+                                            className="..."
+                                        />
+                                    </button>
+                                ) : (
+                                    initials
+                                )}
+                            </div>
+
+                            {/* Add photo button */}
+                            <label
+                                htmlFor="profile-photo"
+                                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-emerald-500 border-2 border-zinc-950 flex items-center justify-center text-black cursor-pointer hover:bg-emerald-400 transition-colors"
+                                title="Change profile photo"
+                            >
+                                {isUploading ? (
+                                    <span className="text-xs">...</span>
+                                ) : (
+                                    <span className="text-xl font-bold leading-none">+</span>
+                                )}
+                            </label>
+
+                            <input
+                                id="profile-photo"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handlePhotoUpload}
+                                disabled={isUploading}
+                                className="hidden"
+                            />
+
+                        </div>
+
                     </div>
 
                     {error && (
                         <p className="mt-5 text-red-400 text-sm">
                             {error}
+                        </p>
+                    )}
+
+                    {photoError && (
+                        <p className="mt-3 text-red-400 text-sm">
+                            {photoError}
                         </p>
                     )}
 
@@ -178,6 +283,24 @@ const handleDeleteAccount = async () => {
                             >
                                 Edit Profile
                             </button>
+
+                            {/* LOGOUT SECTION */}
+                            <div className="mt-8 border-t border-white/10 pt-6">
+                                {logoutError && (
+                                    <p className="text-red-400 text-sm mb-3">
+                                        {logoutError}
+                                    </p>
+                                )}
+
+                                <button
+                                    onClick={handleLogout}
+                                    disabled={isLoggingOut}
+                                    className="flex items-center gap-2 rounded-lg bg-red-500/10 px-5 py-3 text-red-400 hover:bg-red-500/20 transition disabled:opacity-50"
+                                >
+                                    <LogOut size={18} />
+                                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                                </button>
+                            </div>
                         </>
                     )}
                     
@@ -242,9 +365,31 @@ const handleDeleteAccount = async () => {
                             </div>
                         </div>
                     )}
-
                 </div>
-            </div>
+            </div>           
+            {/* PROFILE PHOTO PREVIEW */}
+            {showPhotoPreview && authUser?.profilePhoto && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+                    onClick={() => setShowPhotoPreview(false)}
+                >
+                    <button
+                        type="button"
+                        onClick={() => setShowPhotoPreview(false)}
+                        className="absolute right-6 top-6 text-white text-3xl"
+                        aria-label="Close photo preview"
+                    >
+                        &times;
+                    </button>
+
+                    <img
+                        src={authUser.profilePhoto}
+                        alt={`${authUser.name}'s profile`}
+                        className="max-h-[85vh] max-w-full rounded-xl object-contain"
+                        onClick={event => event.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 };

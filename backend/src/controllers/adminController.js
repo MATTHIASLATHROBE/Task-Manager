@@ -130,11 +130,69 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
-export{
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find the account we want to delete
+        const userToDelete = await User.findById(id);
+
+        if (!userToDelete) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Prevent deletion of admin accounts
+        if (userToDelete.isAdmin) {
+            return res.status(403).json({
+                message: "Admin accounts cannot be deleted"
+            });
+        }
+
+        // Check who is making the request
+        if (
+            !req.user.isAdmin &&
+            req.user._id.toString() !== id
+        ) {
+            return res.status(403).json({
+                message: "You are not authorized to delete this account"
+            });
+        }
+
+        // Delete all tasks belonging to this user
+        await Task.deleteMany({ user: id });
+
+        // Delete the user account
+        await User.findByIdAndDelete(id);
+
+        // Clear cookie if the user deleted their own account
+        if (req.user._id.toString() === id) {
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Account deleted successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Error deleting account"
+        });
+    }
+};
+
+export {
     getAllUsers,
     getUserDetails,
     getUserTasks,
-    getDashboardStats
+    getDashboardStats,
+    deleteUser
 };
 
 

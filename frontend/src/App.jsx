@@ -31,8 +31,10 @@ import {
 import {
     getCurrentUser,
     updateProfile,
-    deleteUser
+    deleteUser,
+    uploadProfilePhoto
 } from './services/authServices';
+
 const App = () => {
     // Authentication state
     const [authUser, setAuthUser] = useState(null);
@@ -230,6 +232,14 @@ const App = () => {
         return response;
     };
 
+    const handleProfilePhotoUpload = async (file) => {
+    const response = await uploadProfilePhoto(file);
+
+    setAuthUser(response.user);
+
+    return response;
+    };
+
     const handleAccountDelete = async (userId) => {
         await deleteUser(userId);
         handleLogoutSuccess();
@@ -340,7 +350,15 @@ const App = () => {
                     />
                     <Route
                         path="/profile"
-                        element={<Profile authUser={authUser} onProfileUpdate={handleProfileUpdate} onDeleteAccount={handleAccountDelete}/>}
+                        element={
+                        <Profile
+                            authUser={authUser}
+                            onProfileUpdate={handleProfileUpdate}
+                            onDeleteAccount={handleAccountDelete}
+                            onProfilePhotoUpload={handleProfilePhotoUpload}
+                            onLogoutSuccess={handleLogoutSuccess}
+                        />
+                    }
                     />
                 </Route>
             </Route>

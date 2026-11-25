@@ -1,68 +1,17 @@
 
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink} from 'react-router-dom';
 import {
     LayoutDashboard,
     ListTodo,
-    LogOut,
     Menu,
     X,
     ArrowUpRight
 } from 'lucide-react';
 
-import { logoutUser } from '../services/authServices';
-
-// Profile dropdown is declared outside Navbar
-const ProfileDropdown = ({
-    authUser,
-    onClose,
-    onLogout,
-    isLoggingOut
-}) => {
-    return (
-        <div className="absolute right-0 top-full mt-3 w-60 rounded-xl border border-white/10 bg-zinc-950 shadow-2xl p-2 z-50">
-
-            <div className="px-3 py-3 border-b border-white/10">
-                <p className="text-sm font-semibold text-white">
-                    {authUser?.name}
-                </p>
-
-                <p className="text-xs text-gray-400 mt-1 break-all">
-                    {authUser?.email}
-                </p>
-            </div>
-
-            <NavLink
-                to="/profile"
-                onClick={onClose}
-                className="flex items-center px-3 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-emerald-400 rounded-lg transition-colors"
-            >
-                My Profile
-            </NavLink>
-
-            <button
-                type="button"
-                onClick={onLogout}
-                disabled={isLoggingOut}
-                className="flex items-center gap-3 w-full px-3 py-3 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-            >
-                <LogOut size={17} />
-                {isLoggingOut ? 'Logging out...' : 'Logout'}
-            </button>
-        </div>
-    );
-};
-
-
-const Navbar = ({ authUser, onLogoutSuccess }) => {
+const Navbar = ({ authUser}) => {
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const [desktopProfileOpen, setDesktopProfileOpen] = useState(false);
-    const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-    const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [error, setError] = useState('');
-
-    const navigate = useNavigate();
 
     // Get user's initials
     const userInitials = authUser?.name
@@ -91,31 +40,8 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
     // Close every open menu
     const closeAllMenus = () => {
         setMenuOpen(false);
-        setDesktopProfileOpen(false);
-        setMobileProfileOpen(false);
     };
 
-    // Logout handler
-    const handleLogout = async () => {
-        try {
-            setIsLoggingOut(true);
-            setError('');
-
-            await logoutUser();
-
-            onLogoutSuccess?.();
-
-            closeAllMenus();
-
-            navigate('/login', { replace: true });
-
-        } catch (error) {
-            setError(error.message || 'Unable to log out.');
-
-        } finally {
-            setIsLoggingOut(false);
-        }
-    };
 
 
     return (
@@ -164,40 +90,29 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
                             </NavLink>
                         ))}
 
-
                         {/* DESKTOP PROFILE */}
-                        <div className="relative ml-3">
+                        <NavLink
+                            to="/profile"
+                            onClick={closeAllMenus}
+                            className="flex items-center gap-3 rounded-full border border-white/10 p-1.5 hover:bg-white/5 transition-all"
+                            aria-label="Go to profile"
+                        >
+                            <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-500 flex items-center justify-center text-black font-bold text-sm shrink-0">
+                                {authUser?.profilePhoto ? (
+                                    <img
+                                        src={authUser.profilePhoto}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    userInitials
+                                )}
+                            </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setDesktopProfileOpen(prev => !prev);
-                                    setMobileProfileOpen(false);
-                                    setMenuOpen(false);
-                                }}
-                                className="flex items-center gap-3 rounded-full border border-white/10 p-1.5 hover:bg-white/5 transition-all"
-                                aria-label="Open profile menu"
-                                aria-expanded={desktopProfileOpen}
-                            >
-                                <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold text-sm">
-                                    {userInitials}
-                                </div>
-
-                                <span className="text-sm text-gray-300 pr-2">
-                                    {authUser?.name || 'My Account'}
-                                </span>
-                            </button>
-
-                            {desktopProfileOpen && (
-                                <ProfileDropdown
-                                    authUser={authUser}
-                                    onClose={closeAllMenus}
-                                    onLogout={handleLogout}
-                                    isLoggingOut={isLoggingOut}
-                                />
-                            )}
-
-                        </div>
+                            <span className="text-sm text-gray-300 pr-2">
+                                {authUser?.name || 'My Account'}
+                            </span>
+                        </NavLink>
 
                     </div>
 
@@ -206,32 +121,22 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
                     <div className="sm:hidden flex items-center gap-3">
 
                         {/* MOBILE PROFILE */}
-                        <div className="relative">
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setMobileProfileOpen(prev => !prev);
-                                    setDesktopProfileOpen(false);
-                                    setMenuOpen(false);
-                                }}
-                                className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold text-sm"
-                                aria-label="Open profile menu"
-                                aria-expanded={mobileProfileOpen}
-                            >
-                                {userInitials}
-                            </button>
-
-                            {mobileProfileOpen && (
-                                <ProfileDropdown
-                                    authUser={authUser}
-                                    onClose={closeAllMenus}
-                                    onLogout={handleLogout}
-                                    isLoggingOut={isLoggingOut}
+                        <NavLink
+                            to="/profile"
+                            onClick={closeAllMenus}
+                            className="w-10 h-10 rounded-full overflow-hidden bg-emerald-500 flex items-center justify-center text-black font-bold text-sm"
+                            aria-label="Go to profile"
+                        >
+                            {authUser?.profilePhoto ? (
+                                <img
+                                    src={authUser.profilePhoto}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
                                 />
+                            ) : (
+                                userInitials
                             )}
-
-                        </div>
+                        </NavLink>
 
 
                         {/* MOBILE MENU BUTTON */}
@@ -239,8 +144,6 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
                             type="button"
                             onClick={() => {
                                 setMenuOpen(prev => !prev);
-                                setMobileProfileOpen(false);
-                                setDesktopProfileOpen(false);
                             }}
                             className="flex items-center justify-center w-11 h-11 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/15 transition-all"
                             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -267,10 +170,6 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
                             <div className="px-3 pt-2 pb-3">
                                 <p className="text-[10px] font-bold tracking-[0.25em] text-emerald-500 uppercase">
                                     Navigation
-                                </p>
-
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Manage your workspace
                                 </p>
                             </div>
 
@@ -317,15 +216,6 @@ const Navbar = ({ authUser, onLogoutSuccess }) => {
 
                     </div>
                 )}
-
-
-                {/* ERROR MESSAGE */}
-                {error && (
-                    <p className="text-red-400 text-sm pb-3">
-                        {error}
-                    </p>
-                )}
-
             </div>
 
         </nav>

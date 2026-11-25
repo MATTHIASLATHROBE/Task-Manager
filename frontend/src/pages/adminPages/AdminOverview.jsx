@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 import {
     getDashboardStats,
-    getAllUsers
+    getAllUsers,
+    deleteUser
 } from '../../services/adminService';
 
 import {
@@ -14,7 +15,8 @@ import {
     Clock3,
     CalendarDays,
     ShieldCheck,
-    Eye
+    Eye,
+    Trash2
 } from 'lucide-react';
 
 const AdminOverview = () => {
@@ -44,6 +46,31 @@ const AdminOverview = () => {
 
         fetchDashboardData();
     }, []);
+
+    const handleDeleteUser = async (event, userId, userName) => {
+        event.stopPropagation();
+
+        const confirmed = window.confirm(
+            `Are you sure you want to delete ${userName}'s account? Their tasks will also be deleted.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            await deleteUser(userId);
+
+            setUsers((prevUsers) =>
+                prevUsers.filter((user) => user._id !== userId)
+            );
+
+            // Refresh dashboard statistics
+            const statsResponse = await getDashboardStats();
+            setStats(statsResponse.stats);
+
+        } catch (error) {
+            alert(error.message);
+        }
+    };
 
     const statCards = [
         {
@@ -208,17 +235,30 @@ const AdminOverview = () => {
                                         </td>
 
                                         <td className="py-4 px-3">
-                                            <button
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
+                                            <div className="flex items-center gap-4">
+                                                <button
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        navigate(`/admin/users/${user._id}`);
+                                                    }}
+                                                    className="inline-flex items-center gap-2 text-[#16A34A] hover:text-green-400 text-sm font-medium"
+                                                >
+                                                    <Eye size={16} />
+                                                    View Details
+                                                </button>
 
-                                                    navigate(`/admin/users/${user._id}`);
-                                                }}
-                                                className="inline-flex items-center gap-2 text-[#16A34A] hover:text-green-400 text-sm font-medium"
-                                            >
-                                                <Eye size={16} />
-                                                View Details
-                                            </button>
+                                                {!user.isAdmin && (
+                                                    <button
+                                                        onClick={(event) =>
+                                                            handleDeleteUser(event, user._id, user.name)
+                                                        }
+                                                        className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

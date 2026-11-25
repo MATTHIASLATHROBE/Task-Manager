@@ -37,3 +37,14 @@ export const deleteUser = (userId) => {
         method: 'DELETE'
     });
 };
+
+export const uploadProfilePhoto = (file) => {
+    const formData = new FormData();
+
+    formData.append('profilePhoto', file);
+
+    return apiRequest('/auth/users/profile/photo', {
+        method: 'PUT',
+        body: formData
+    });
+};

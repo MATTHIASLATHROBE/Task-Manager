@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MATTHIASLATHROBE/Task-Manager.git"
@@ -21,5 +21,9 @@
   "homepage": "https://github.com/MATTHIASLATHROBE/Task-Manager#readme",
   "devDependencies": {
     "concurrently": "^10.0.7"
+  },
+  "dependencies": {
+    "cloudinary": "^2.11.0",
+    "multer": "^2.5.0"
   }
 }
