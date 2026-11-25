@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        'http://192.168.0.108:5173',
         'https://task-manager-navy-eta.vercel.app'
     ],
     credentials: true

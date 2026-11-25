@@ -20,12 +20,17 @@ const createUser = async (req, res) => {
         await newUser.save();
 
         const token = userToken(newUser);
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
 
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        const cookieOptions = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            path: '/',
+        };
+
+        res.cookie('token', token, cookieOptions);
         res.status(201).json({ message: "User created successfully", user: {name: newUser.name, email: newUser.email} });
     }
 
@@ -56,13 +61,16 @@ const loginUser = async (req, res) => {
 
         const token = userToken(user);
         
+        const isProduction = process.env.NODE_ENV === 'production';
 
-        res.cookie('token', token, {
+        const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
-        res.status(200).json({ message: "Login successful", user: {name: user.name, email: user.email}, token });
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            path: '/',
+        };
+        res.cookie('token', token, cookieOptions);
+        res.status(200).json({ message: "Login successful", user: {name: user.name, email: user.email}});
     }
     catch(error){
         res.status(400).json({message: "Error logging in user"});
